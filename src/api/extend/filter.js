@@ -4,15 +4,22 @@ import Vue from 'vue'
 // undefined(要的字段没有返回)
 // null(数据不存在)
 // 空字符串(可能人为设置)
+
+const isInvalid = (val) => {
+    if (val === undefined || val === null || isNaN(val) || val === '') {
+        return true
+    }
+    return false
+}
 /**
  * 千分位
  * 只对数字有效
  */
-const kNumFmt = (__num) => {
-    if (__num === undefined || __num === null || isNaN(__num) || __num === '') {
-        return __num
+const kNumFmt = (val) => {
+    if (isInvalid(val)) {
+        return val
     }
-    var _splitAr = __num.toString().split('.')
+    var _splitAr = val.toString().split('.')
     var _intPart = _splitAr[0] // 获取整数部分
     _intPart = _intPart
         .toString()
@@ -27,65 +34,64 @@ const kNumFmt = (__num) => {
 /**
  * 在项目中对无值字段的处理方式
  */
-const nullFmt = (__value, __unit, __flag) => {
-    __flag = __flag || '--'
-    __unit = __unit || ''
-    if (__value === undefined || __value === null || __value === '') {
-        return __flag
+const nullFmt = (val, unit, flag) => {
+    flag = flag || '--'
+    unit = unit || ''
+    if (isInvalid(val)) {
+        return flag
     } else {
-        return __value + __unit
+        return val + unit
     }
 }
 /**
  * 数字小数点个数
  * 只支持数字
  */
-const numFloadtCount = (__num, __floatCount, __zeroLimit) => {
-    __floatCount = __floatCount == undefined ? 2 : __floatCount
-    if (__num === undefined || __num === null || isNaN(__num) || __num === '') {
-        return __num
+const numFloadtCount = (val, floatCount = 2, zeroLimit) => {
+    if (isInvalid(val)) {
+        return val
     }
-    if (__zeroLimit && __num == 0) {
-        return __num
+    if (zeroLimit && val === 0) {
+        return val
     }
-    return __num.toFixed(__floatCount)
+    return Number(val).toFixed(floatCount)
 }
 /**
  * 数字类型：亿 万
  */
-const numFmt = (__num, __floatCount) => {
-    __num = __num || 0
-    var _num = __num
+const numFmt = (num, floatCount) => {
+    num = Number(num) || 0
+    var _num = num
     var _tag = ''
 
-    if (__num >= 100000000) {
+    if (num >= 100000000) {
         _tag = '亿'
-        _num = __num / 100000000
-    } else if (__num >= 10000) {
+        _num = num / 100000000
+    } else if (num >= 10000) {
         _tag = '万'
-        _num = __num / 10000
+        _num = num / 10000
     } else {
-        _num = __num
+        _num = num
     }
-    return __floatCount == undefined ? _tag : _num.toFixed(__floatCount)
+    return floatCount == undefined ? _tag : _num.toFixed(floatCount)
 }
 /**
  * 对字节的转换处理
  */
-const bytesToSize = (__bytes, __floatCount) => {
-    __bytes = parseInt(__bytes)
-    if (__bytes === 0) return '0 B'
+const bytesToSize = (bytes, floatCount) => {
+    bytes = parseInt(bytes)
+    if (bytes === 0) return '0 B'
     var _k = 1024
     var _sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-    var _i = Math.floor(Math.log(__bytes) / Math.log(_k))
-    var _m = __bytes / Math.pow(_k, _i)
+    var _i = Math.floor(Math.log(bytes) / Math.log(_k))
+    var _m = bytes / Math.pow(_k, _i)
     switch (_i) {
         case 0:
         case 1:
-            _m = (__floatCount == undefined ? _m.toFixed(0) : _m.toFixed(__floatCount)) + _sizes[_i]
+            _m = (floatCount == undefined ? _m.toFixed(0) : _m.toFixed(floatCount)) + _sizes[_i]
             break
         default:
-            _m = (__floatCount == undefined ? _m.toFixed(2) : _m.toFixed(__floatCount)) + _sizes[_i]
+            _m = (floatCount == undefined ? _m.toFixed(2) : _m.toFixed(floatCount)) + _sizes[_i]
             break
     }
     return _m
